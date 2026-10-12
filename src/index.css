@@ -1,0 +1,13 @@
+@import "tailwindcss";
+
+@theme {
+  --color-term-bg: var(--color-mist-900);
+  --color-term-fg: var(--color-white);
+  --color-term-dim: var(--color-mist-400);
+  --color-term-accent: var(--color-lime-500);
+  --color-term-link: var(--color-sky-500);
+  --color-term-error: var(--color-red-500);
+  --font-mono:
+    ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, "Liberation Mono",
+    monospace;
+}
