@@ -135,7 +135,7 @@ export const useCLI = () => {
    */
   useEffect(() => {
     if (inputRef.current) {
-      inputRef.current.scrollIntoView();
+      inputRef.current.scrollIntoView({ block: "end" });
     }
   }, [session]);
 
