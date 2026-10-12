@@ -1,5 +1,5 @@
 import { Fragment, useState } from "react";
-import type { OutputComponent, Run } from "./commands";
+import { noopRun, type OutputComponent } from "./commands";
 import type { ParseKeys } from "i18next";
 import { useTranslation } from "react-i18next";
 
@@ -56,7 +56,7 @@ const CONTACT_ITEMS: {
   },
 ];
 
-export const Output: OutputComponent = () => {
+export const Contact = () => {
   const { t } = useTranslation();
 
   return (
@@ -87,4 +87,6 @@ export const Output: OutputComponent = () => {
   );
 };
 
-export const run: Run = (state) => state;
+export const Output: OutputComponent = () => <Contact />;
+
+export const run = noopRun;

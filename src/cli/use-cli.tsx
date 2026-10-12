@@ -1,31 +1,109 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Command, COMMANDS, Commands, isCommand, type State } from "./commands";
+import {
+  Command,
+  COMMANDS,
+  getCommand,
+  type Entry,
+  type State,
+} from "./commands";
+import { tokenize } from "./tokenize";
+import { getNode, HOME, resolvePath } from "../fs";
+
+const INITIAL_ENTRY: Entry = {
+  id: 0,
+  input: Command.HELP,
+  name: Command.HELP,
+  args: [],
+  cwd: HOME,
+  historySize: 0,
+};
+
+const PATH_COMMANDS: string[] = [Command.LS, Command.CD, Command.CAT];
+
+const commonPrefix = (values: string[]) =>
+  values.reduce((prefix, value) => {
+    let i = 0;
+
+    while (i < prefix.length && prefix[i] === value[i]) i++;
+
+    return prefix.slice(0, i);
+  });
+
+/**
+ * completions for the last word of input: command names or paths
+ */
+const complete = (input: string, cwd: string): string[] => {
+  const words = input.trimStart().split(/\s+/);
+  const word = words[words.length - 1];
+
+  if (words.length === 1) {
+    return COMMANDS.filter((command) => command.startsWith(word));
+  }
+
+  if (!PATH_COMMANDS.includes(words[0])) {
+    return [];
+  }
+
+  const slash = word.lastIndexOf("/");
+  const dirPart = word.slice(0, slash + 1);
+  const base = word.slice(slash + 1);
+  const dir = getNode(resolvePath(cwd, dirPart || "."));
+
+  if (dir?.type !== "dir") {
+    return [];
+  }
+
+  return Object.entries(dir.children)
+    .filter(
+      ([name, node]) =>
+        name.startsWith(base) &&
+        (words[0] !== Command.CD || node.type === "dir"),
+    )
+    .map(([name, node]) => dirPart + name + (node.type === "dir" ? "/" : ""));
+};
 
 export const useCLI = () => {
   const [command, setCommand] = useState("");
-  const [session, setSession] = useState<State["session"]>([Command.HELP]);
+  const [session, setSession] = useState<State["session"]>([INITIAL_ENTRY]);
   const [history, setHistory] = useState<State["history"]>([]);
+  const [cwd, setCwd] = useState<State["cwd"]>(HOME);
   const inputRef = useRef<HTMLInputElement>(null);
   const currentHistoryIndex = useRef<number>(0);
+  const nextId = useRef<number>(1);
 
   /**
    * run any command
    */
   const handleCommand = useCallback(
-    (command: string) => {
-      const state = {
-        history: [...history, command],
-        session: [...session, command],
+    (input: string) => {
+      const [name = "", ...args] = tokenize(input);
+      const nextHistory = input ? [...history, input] : history;
+
+      const entry: Entry = {
+        id: nextId.current++,
+        input,
+        name,
+        args,
+        cwd,
+        historySize: nextHistory.length,
       };
 
-      const newState = Commands[isCommand(command) ? command : Command.UNKNOWN].run(state);
+      const state: State = {
+        history: nextHistory,
+        session: [...session, entry],
+        cwd,
+      };
+
+      const newState = name ? getCommand(name).run(state, args) : state;
 
       setHistory(newState.history);
       setSession(newState.session);
+      setCwd(newState.cwd);
 
       setCommand("");
+      currentHistoryIndex.current = 0;
     },
-    [history, session],
+    [history, session, cwd],
   );
 
   /**
@@ -84,20 +162,23 @@ export const useCLI = () => {
         case "ArrowUp": {
           e.preventDefault();
 
-          setCommand(history[history.length - currentHistoryIndex.current - 1]);
-          currentHistoryIndex.current++;
+          if (currentHistoryIndex.current < history.length) {
+            currentHistoryIndex.current++;
+            setCommand(history[history.length - currentHistoryIndex.current]);
+          }
 
           break;
         }
         case "ArrowDown": {
           e.preventDefault();
 
-          setCommand(history[history.length - currentHistoryIndex.current + 1]);
-          currentHistoryIndex.current--;
-
-          if (currentHistoryIndex.current <= 0) {
-            currentHistoryIndex.current = 0;
-            setCommand("");
+          if (currentHistoryIndex.current > 0) {
+            currentHistoryIndex.current--;
+            setCommand(
+              currentHistoryIndex.current === 0
+                ? ""
+                : history[history.length - currentHistoryIndex.current],
+            );
           }
 
           break;
@@ -105,13 +186,20 @@ export const useCLI = () => {
         case "Tab": {
           e.preventDefault();
 
-          const completions = COMMANDS.filter((completion) =>
-            completion.startsWith(command),
-          );
+          const completions = complete(command, cwd);
 
-          if (completions.length === 1) {
-            setCommand(completions[0]);
+          if (!completions.length) {
+            break;
           }
+
+          const word =
+            completions.length === 1
+              ? completions[0]
+              : commonPrefix(completions);
+          const suffix =
+            completions.length === 1 && !word.endsWith("/") ? " " : "";
+
+          setCommand(command.replace(/\S*$/, () => word + suffix));
 
           break;
         }
@@ -120,7 +208,7 @@ export const useCLI = () => {
         }
       }
     },
-    [command, history],
+    [command, history, cwd, handleCommand],
   );
 
   return {
@@ -131,5 +219,6 @@ export const useCLI = () => {
     history,
     session,
     command,
+    cwd,
   };
 };

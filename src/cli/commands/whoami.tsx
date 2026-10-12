@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import type { ParseKeys } from "i18next";
-import type { OutputComponent, Run } from "./commands";
+import { noopRun, type OutputComponent } from "./commands";
 
 type WhoamiKeys = Extract<ParseKeys, `whoami.${string}`>;
 
@@ -9,7 +9,7 @@ type Item = {
   time: WhoamiKeys;
 };
 
-const TECH = ["typescript", "react", "redux", "react-query", "next.js"];
+const TECH = ["typescript", "react", "redux", "react-query", "next.js", "jest", "playwright"];
 
 const WORKED_ITEMS: Item[] = [
   {
@@ -33,7 +33,7 @@ const STUDIED_ITEMS: Item[] = [
   },
 ];
 
-export const Output: OutputComponent = () => {
+export const Whoami = () => {
   const { t } = useTranslation();
 
   return (
@@ -71,4 +71,6 @@ export const Output: OutputComponent = () => {
   );
 };
 
-export const run: Run = (state) => state;
+export const Output: OutputComponent = () => <Whoami />;
+
+export const run = noopRun;

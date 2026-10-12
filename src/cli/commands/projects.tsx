@@ -1,39 +1,6 @@
 import { useTranslation } from "react-i18next";
-import type { ParseKeys } from "i18next";
-import type { OutputComponent, Run } from "./commands";
-
-type ProjectsKeys = Extract<ParseKeys, `projects.${string}`>;
-
-type Item = {
-  label: ProjectsKeys;
-  link?: string;
-  where?: ProjectsKeys;
-};
-
-const ITEMS: Item[] = [
-  {
-    label: "projects.tripstat",
-    link: "https://tripstat.io",
-  },
-  {
-    label: "projects.nitid",
-    link: "https://nitid.site",
-  },
-  {
-    label: "projects.telemost",
-    link: "https://telemost.yandex.ru",
-    where: "projects.yandex",
-  },
-  {
-    label: "projects.gitverse",
-    link: "https://gitverse.ru",
-    where: "projects.sber",
-  },
-  {
-    label: "projects.rdm",
-    where: "projects.mts",
-  },
-];
+import { PROJECTS } from "../../fs/projects";
+import { noopRun, type OutputComponent } from "./commands";
 
 export const Output: OutputComponent = () => {
   const { t } = useTranslation();
@@ -43,8 +10,8 @@ export const Output: OutputComponent = () => {
       <h2 className="font-bold">{t("projects.title")}</h2>
       <br />
       <ul>
-        {ITEMS.map((item) => (
-          <li key={item.label}>
+        {PROJECTS.map((item) => (
+          <li key={item.id}>
             -{" "}
             {item.link ? (
               <a
@@ -59,7 +26,10 @@ export const Output: OutputComponent = () => {
               <span>{t(item.label)}</span>
             )}
             {item.where && (
-              <span className="text-term-dim"> ({t(item.where)})</span>
+              <span className="text-term-dim"> @{t(item.where)}</span>
+            )}
+            {item.description && (
+              <span className="text-term-dim"> - {t(item.description)}</span>
             )}
           </li>
         ))}
@@ -69,4 +39,4 @@ export const Output: OutputComponent = () => {
   );
 };
 
-export const run: Run = (state) => state;
+export const run = noopRun;

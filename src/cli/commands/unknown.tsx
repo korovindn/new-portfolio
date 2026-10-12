@@ -1,7 +1,7 @@
-import type { OutputComponent, Run } from "./commands";
+import { noopRun, type OutputComponent } from "./commands";
 
-export const Output: OutputComponent = () => {
-  return <div className="text-term-error">command not found</div>;
+export const Output: OutputComponent = ({ name }) => {
+  return <div className="text-term-error">command not found: {name}</div>;
 };
 
-export const run: Run = (state) => state;
+export const run = noopRun;

@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 
-import { HELP, isCommand, type OutputComponent, type Run } from "./commands";
+import { HELP, type OutputComponent, type Run } from "./commands";
 
 export const Output: OutputComponent = ({ call }) => {
   const { t } = useTranslation();
@@ -17,7 +17,7 @@ export const Output: OutputComponent = ({ call }) => {
             -{" "}
             <span
               className="text-term-accent cursor-pointer"
-              onClick={() => isCommand(command) && call(command)}
+              onClick={() => call(command)}
             >
               {command}
             </span>{" "}
