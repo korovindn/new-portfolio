@@ -10,3 +10,7 @@
   --color-term-error: var(--color-red-500);
   --font-mono: "JetBrains Mono Variable", ui-monospace, monospace;
 }
+
+html {
+  background-color: var(--color-term-bg);
+}
