@@ -41,7 +41,7 @@ export const Whoami = () => {
       <h2 className="font-bold">{t("whoami.title")}</h2>
       <br />
       <p className="text-term-accent">{t("whoami.use")}</p>
-      <ul>
+      <ul className="grid grid-cols-2 max-w-lg">
         {TECH.map((item) => (
           <li key={item}>- {item}</li>
         ))}

@@ -9,14 +9,16 @@ import {
 import { tokenize } from "./tokenize";
 import { getNode, HOME, resolvePath } from "../fs";
 
-const INITIAL_ENTRY: Entry = {
-  id: 0,
-  input: Command.HELP,
-  name: Command.HELP,
+const INITIAL_COMMANDS = [Command.HELP, Command.WHOAMI, Command.PROJECTS];
+
+const INITIAL_SESSION: Entry[] = INITIAL_COMMANDS.map((command, id) => ({
+  id,
+  input: command,
+  name: command,
   args: [],
   cwd: HOME,
   historySize: 0,
-};
+}));
 
 const PATH_COMMANDS: string[] = [Command.LS, Command.CD, Command.CAT];
 
@@ -64,18 +66,21 @@ const complete = (input: string, cwd: string): string[] => {
 
 export const useCLI = () => {
   const [command, setCommand] = useState("");
-  const [session, setSession] = useState<State["session"]>([INITIAL_ENTRY]);
+  const [session, setSession] = useState<State["session"]>(INITIAL_SESSION);
   const [history, setHistory] = useState<State["history"]>([]);
   const [cwd, setCwd] = useState<State["cwd"]>(HOME);
   const inputRef = useRef<HTMLInputElement>(null);
   const currentHistoryIndex = useRef<number>(0);
-  const nextId = useRef<number>(1);
+  const nextId = useRef<number>(INITIAL_SESSION.length);
+  const hasUserCommand = useRef(false);
 
   /**
    * run any command
    */
   const handleCommand = useCallback(
     (input: string) => {
+      hasUserCommand.current = true;
+
       const [name = "", ...args] = tokenize(input);
       const nextHistory = input ? [...history, input] : history;
 
@@ -110,9 +115,7 @@ export const useCLI = () => {
    * initial focus
    */
   useEffect(() => {
-    if (inputRef.current) {
-      inputRef.current.focus();
-    }
+    inputRef.current?.focus({ preventScroll: true });
   }, [inputRef]);
 
   /**
@@ -121,7 +124,7 @@ export const useCLI = () => {
   useEffect(() => {
     const saveFocus = () => {
       if (inputRef.current && !document.getSelection()?.toString()) {
-        inputRef.current.focus();
+        inputRef.current.focus({ preventScroll: !hasUserCommand.current });
       }
     };
 
@@ -134,9 +137,11 @@ export const useCLI = () => {
    * scroll to bottom when session is appended/cleared
    */
   useEffect(() => {
-    if (inputRef.current) {
-      inputRef.current.scrollIntoView({ block: "end" });
+    if (!hasUserCommand.current || !inputRef.current) {
+      return;
     }
+
+    inputRef.current.scrollIntoView({ block: "end" });
   }, [session]);
 
   /**

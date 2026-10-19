@@ -19,6 +19,12 @@ export const PROJECTS: Project[] = [
     link: "https://tripstat.io",
   },
   {
+    id: "conjuego",
+    label: "projects.conjuego",
+    description: "projects.conjuegoDesc",
+    link: "https://conjuego.com",
+  },
+  {
     id: "nitid",
     label: "projects.nitid",
     description: "projects.nitidDesc",

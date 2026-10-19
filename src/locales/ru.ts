@@ -25,6 +25,8 @@ export const ru = {
     title: "что я наделал",
     tripstat: "tripstat",
     tripstatDesc: "интерактивная карта путешествий, ии планировщик поездок, отзывы путешественников",
+    conjuego: "conjuego",
+    conjuegoDesc: "js-библиотека для спряжения испанских глаголов",
     nitid: "nitid",
     nitidDesc: "комнаты с субтитрами в реальном времени",
     telemost: "телемост",

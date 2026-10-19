@@ -61,7 +61,7 @@ export const Contact = () => {
 
   return (
     <div>
-      <div className="grid grid-cols-5">
+      <div className="grid grid-cols-5 max-w-lg">
         {CONTACT_ITEMS.map((item) => (
           <Fragment key={item.label}>
             <div className="col-span-2">{t(item.label)}</div>

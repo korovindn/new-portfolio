@@ -27,6 +27,8 @@ export const en = {
     title: "stuff i've made",
     tripstat: "tripstat",
     tripstatDesc: "interactive travel map, ai trip planner, traverer reviews",
+    conjuego: "conjuego",
+    conjuegoDesc: "js library for conjugating spanish verbs",
     nitid: "nitid",
     nitidDesc: "rooms with realtime subtitles",
     telemost: "telemost",
